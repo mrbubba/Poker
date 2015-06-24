@@ -2,9 +2,14 @@ __author__ = 'mark'
 class Analyzer(object):
     """ Analyzer object
 
+    Attributes:
+
+        pots(list):  list of pot objects to be analyzed
+        cards(list):  list of community cards
+
     Methods:
 
-        Analyze:    gets the community cards and list of pots from the dealer,
+        analyze:    gets the community cards and list of pots from the dealer,
                     for each pot awards the chips to the winner/s
     """
 

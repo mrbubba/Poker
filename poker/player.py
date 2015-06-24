@@ -11,7 +11,7 @@ class Player(object):
         equity(int):  how much the current player has put in the current round
                       of betting
         action(bool):  if true allows player to act
-        current_equity:  amount of chips committed to the current round of betting
+        table(obj);  the table object
 
      Methods:
         fold:   Removes player from all open pots(ends action for this hand),
@@ -32,6 +32,7 @@ class Player(object):
         self.hole = []
         self.equity = int()
         self.action = False
+        self.table = None
 
     def fold(self):
         pass

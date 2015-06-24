@@ -1,10 +1,14 @@
 from deck import Deck
-from table import Table
 
 
 class Dealer(object):
     """the dealer object wil be responsible for dealing, removing broke players
     from the game and awarding chips to winning players
+
+    Attributes
+
+        table(obj):  the table object
+        deck(obj):  the deck object
 
     Methods:
 
@@ -26,20 +30,25 @@ class Dealer(object):
         self.table = table
         self.deck = Deck()
         self.deck.create()
-        self.players = self.table.players
 
     def _remove_0_stack(self):
-        big_blind = self.players[self.table.big_blind]
-        for player in self.players:
-            if player.stack == 0:
-                if len(self.players) > 3 and player == big_blind:
-                    self.table.no_small_blind = True
-                    self.players.remove(player)
-                else:
-                    self.players.remove(player)
+        """set seat to inactive for  broke players"""
+        for seat in self.table.seats:
+            if seat.active and seat.player.stack == 0:
+                    seat.active = False
+
+    def _get_active_players(self):
+        """we only want to deal to active players"""
+        active_players = []
+        for seat in self.table.seats:
+            if seat.active:
+                active_players.append(seat.player)
+        return  active_players
 
     def _deal_hole(self):
-        for i in range(0, 2):
-            for player in self.players:
+        """Deals the two hole cards to all active players"""
+        active_players = Dealer._get_active_players(self)
+        for i in range(2):
+            for player in active_players:
                 x = self.deck.deal()
                 player.hole.append(x)

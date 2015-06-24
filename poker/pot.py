@@ -8,12 +8,15 @@ class Pot(object):
 
         pot(int):   total amount of chips in the middle(another words all chips
                     not currently in player.stack)
-        init_incriment(int):  bet incriment at the start of each betting round
+        init_increment(int):  bet increment at the start of each betting round
         increment(int):  current bet increment for this round of betting
         bet(int):  the current bet
         side_pot(int):  the amount of chips in the current pot
-        players(list):  list of players currently in the pot not all in
+        seats(list):  list of seats currently in the pot not all in
         all_in(list):  list of seats in the current pot that are all in
+        active(bool):  set to true when the pot needs to act
+        first(int):  position of first to act (either utg or sb)
+        table(obj):  the table object
 
 
     methods:
@@ -26,12 +29,14 @@ class Pot(object):
         set_bet_increment:  sets the bet_increment appropriately
     """
 
-    def __init__(self, pot, init_incriment, incriment, players, all_in, bet):
+    def __init__(self, pot, init_increment, increment, seats, all_in, bet, first):
         self.pot = pot
-        self.init_incriment = init_incriment
-        self.incriment = incriment
-        self.players = players
+        self.init_increment = init_increment
+        self.increment = increment
+        self.seats = seats
         self.all_in = all_in
         self.bet = bet
+        self.active = False
+        self.first = first
 
 
