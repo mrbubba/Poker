@@ -55,13 +55,6 @@ class TestDealer(unittest.TestCase):
             seat.player.table = self.table
             i += 1
 
-    def test_remove_0_stack(self):
-        """Does dealer remove broke players at the start of a hand??"""
-        self.setUp()
-        self.dealer._remove_0_stack()
-
-        self.assertFalse(self.table.seats[2].active)
-
     def test_deal_hole(self):
         """can the dealer deal two cards to each player??"""
         self.table.seats[2].active = False
@@ -110,37 +103,6 @@ class TestTable(unittest.TestCase):
             seat.active = True
             seat.player.table = self.table
 
-    def test_button_move(self):
-        """Can we move the button and the blinds appropriately?"""
-        s1 = Seat('s1')
-        s2 = Seat('s2')
-        s3 = Seat('s3')
-
-        s1.active = True
-        s2.active = True
-        s3.active = True
-        seats = [s1, s2, s3]
-        table = Table(seats, 5, 10)
-        table.big_blind = 1
-        table._button_move()
-        self.assertEqual(table.button, 0)
-        self.assertEqual(table.small_blind, 1)
-        self.assertEqual(table.big_blind, 2)
-
-    def test_button_move_head_to_head(self):
-        """Can we move the blinds and button appropriately head to head?"""
-        s1 = Seat('s1')
-        s2 = Seat('s2')
-        s1.active = True
-        s2.active = True
-        seats = [s1, s2]
-        table = Table(seats, 5, 10)
-        table.big_blind = 0
-        table._button_move()
-        self.assertEqual(table.button, 0)
-        self.assertEqual(table.small_blind, 0)
-        self.assertEqual(table.big_blind, 1)
-
     def test_set_button(self):
         """can we randomly set the button for initial play on active seats only??"""
         self.table.seats[2].active = False
@@ -172,6 +134,38 @@ class TestTable(unittest.TestCase):
         self.assertEqual(self.table.button, self.table.under_the_gun)
         self.assertFalse(self.table.button == self.table.big_blind)
 
+    def test_button_move(self):
+        """Can we move the button and the blinds appropriately?"""
+        s1 = Seat('s1')
+        s2 = Seat('s2')
+        s3 = Seat('s3')
+
+        s1.active = True
+        s2.active = True
+        s3.active = True
+        seats = [s1, s2, s3]
+        table = Table(seats, 5, 10)
+        table.big_blind = 1
+        table._button_move()
+        self.assertEqual(table.button, 0)
+        self.assertEqual(table.small_blind, 1)
+        self.assertEqual(table.big_blind, 2)
+
+    def test_button_move_head_to_head(self):
+        """Can we move the blinds and button appropriately head to head?"""
+        s1 = Seat('s1')
+        s2 = Seat('s2')
+        s1.active = True
+        s2.active = True
+        seats = [s1, s2]
+        table = Table(seats, 5, 10)
+        table.big_blind = 0
+        table._button_move()
+        self.assertEqual(table.button, 0)
+        self.assertEqual(table.small_blind, 0)
+        self.assertEqual(table.big_blind, 1)
+
+
     def test_create_pot(self):
         """ can we spawn a pot object properly? """
         pot = self.table._create_pot()
@@ -181,11 +175,22 @@ class TestTable(unittest.TestCase):
         self.assertEqual(len(self.table.pots), 1)
         self.assertEqual(pot.increment, 10)
 
-    def test_reset(self):
+    def test_reset_players(self):
         """ Can we reset for a new hand??"""
+        self.table.seats[0].player.equity = 50
+        self.table.seats[0].player.hole = [1, 2, 3]
+        self.table._reset_players()
+        self.assertTrue(self.table.seats[0].player.equity == 0)
+        self.assertEqual(len(self.table.seats[0].player.hole), 0)
 
 
+    def test_remove_0_stack(self):
+        """Does the table remove broke players at the start of a hand??"""
+        self.setUp()
+        self.table.seats[2].player.stack = 0
+        self.table._remove_0_stack()
 
+        self.assertFalse(self.table.seats[2].active)
 
 
 if __name__ == '__main__':

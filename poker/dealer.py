@@ -1,4 +1,5 @@
 from deck import Deck
+from analyzer import Analyzer
 
 
 class Dealer(object):
@@ -29,13 +30,6 @@ class Dealer(object):
     def __init__(self, table):
         self.table = table
         self.deck = Deck()
-        self.deck.create()
-
-    def _remove_0_stack(self):
-        """set seat to inactive for  broke players"""
-        for seat in self.table.seats:
-            if seat.active and seat.player.stack == 0:
-                    seat.active = False
 
     def _get_active_players(self):
         """we only want to deal to active players"""
@@ -45,10 +39,30 @@ class Dealer(object):
                 active_players.append(seat.player)
         return  active_players
 
-    def _deal_hole(self):
+    def deal_hole(self):
         """Deals the two hole cards to all active players"""
         active_players = Dealer._get_active_players(self)
+        self.deck.create()
         for i in range(2):
             for player in active_players:
                 x = self.deck.deal()
                 player.hole.append(x)
+
+    def deal(self):
+        pot = self.table.pots(len(self.table.pots)-1)
+        first = self.table.seats[self.button + 1]
+        if first == len(self.table.seats):
+            first = 0
+        pot.first = first
+        if len(self.table.community_cards) == 0:
+            for i in range(3):
+                self.table.community_cards.append(self.deck.deal())
+                pot.active = True
+        elif len(self.table.community_cards) > 2 and \
+                        len(self.table.community_cards) < 5:
+            self.table.community_cards.append(self.deck.deal())
+            pot.active = True
+        else:
+            return Analyzer(self.table)
+
+

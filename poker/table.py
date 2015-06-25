@@ -10,8 +10,7 @@ class Table(object):
 
         community_cards(list):  a list of the cards shared by all players
         seats(list):  list of seats in the game
-        button(int):    indicates which player has the button (sub of seat
-                        in self.seats)
+        seats_active(int):  number of active seats
         small_blind_amount(int):  how much the small blind costs
         big_blind_amount(int):  how much the big blind costs
         ante(int):  how much the ante costs
@@ -38,6 +37,7 @@ class Table(object):
     def __init__(self, seats, small_blind_amount, big_blind_amount, ante=0):
         self.community_cards = []
         self.seats = seats
+        self.seats_active = 0
         self.small_blind_amount = small_blind_amount
         self.big_blind_amount = big_blind_amount
         self.ante = ante
@@ -59,6 +59,9 @@ class Table(object):
         """on start of game we need to randomly assign the button
         and blinds to an active seat"""
         self.button = random.randint(1, len(self.seats) - 1)
+        self.seats_active = len(Table._get_active_seats(self))
+
+
         # check to make sure we've assigned the button to an active seat
         button = True
         while button:
@@ -117,21 +120,16 @@ class Table(object):
                 if self.under_the_gun >= len(self.seats):
                     self.under_the_gun = 0
 
-    def _reset_players(self):
-        self.community_cards = []
-        for seat in self.seats:
-            if seat.player is not None:
-                seat.player.hole = []
-                seat.player.equity = 0
+        Table.init_hand(self)
+
 
     def _button_move(self):
         """moves the buttons and the blinds"""
-        active = Table._get_active_seats(self)
         # exits game when down to a single player
-        if len(active) == 1:
+        if self.seats_active == 1:
             quit()
         # correctly sets the blinds for head to head play
-        elif len(active) == 2:
+        elif self.seats_active == 2:
             self.button = self.big_blind
             self.small_blind = self.big_blind
         else:
@@ -142,17 +140,35 @@ class Table(object):
         move = True
         while move:
             self.big_blind += 1
+            # resets big_blind to 0 if its bigger than seats
             if self.big_blind >= len(self.seats):
                 self.big_blind = 0
             if self.seats[self.big_blind].active:
                 move = False
+            else:
+                self.seats[self.big_blind].player.missed_blind = True
 
     def _create_pot(self):
         """creates the initial pot object with the blinds and antes"""
+
         bb = self.seats[self.big_blind]
         sb = self.seats[self.small_blind]
         all_in = []
         pot = 0
+        sb_post = False
+        button_post = None
+
+        # check for owed posts
+        ns_blind = self.big_blind - 1
+        if ns_blind < 0:
+            ns_blind = len(self.seats) - 1
+        for seat in self.seats:
+            if seat.active and seat.player.missed_blind:
+                if seat == self.seats(self.big_blind):
+                    seat.player.missed_blind = False
+                elif seat == self.seats(self.small_blind):
+
+
         # if active add the small blind to the pot
         if sb.active:
             if sb.player.stack > self.small_blind_amount:
@@ -188,6 +204,7 @@ class Table(object):
                     seat.player.stack -= self.ante
                     pot += self.ante
                 else:
+                    # if ante puts player all in put player in all_in list
                     pot += seat.player.stack
                     seat.player.equity += seat.player.stack
                     seat.player.stack = 0
@@ -199,3 +216,36 @@ class Table(object):
                       self.under_the_gun)
         self.pots = [new_pot]
         return new_pot
+
+    def _reset_players(self):
+        # set player attributes for start of new hand
+        self.community_cards = []
+        for seat in self.seats:
+            if seat.player is not None:
+                seat.player.hole = []
+                seat.player.equity = 0
+
+    def _remove_0_stack(self):
+        """set seat to inactive for broke players"""
+        for seat in self.seats:
+            if seat.active and seat.player.stack == 0:
+                seat.active = False
+
+
+
+    def init_hand(self):
+        """sets the table and players up for a new hand, creates a new pot,
+        then calls the dealer """
+
+        # How many hands in play
+        new_active = len(Table._get_active_seats(self))
+        # if we were head to head but have more now... reset the blinds
+        if self.seats_active == 2 and new_active > 2:
+            Table.set_button(self)
+
+        self.seats_active = new_active
+        Table._remove_0_stack(self)
+        Table._reset_players(self)
+        Table._button_move(self)
+        Table._create_pot(self)
+        self.dealer.deal_hole()
