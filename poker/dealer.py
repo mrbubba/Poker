@@ -58,8 +58,7 @@ class Dealer(object):
             for i in range(3):
                 self.table.community_cards.append(self.deck.deal())
                 pot.active = True
-        elif len(self.table.community_cards) > 2 and \
-                        len(self.table.community_cards) < 5:
+        elif len(self.table.community_cards) > 2 and len(self.table.community_cards) < 5:
             self.table.community_cards.append(self.deck.deal())
             pot.active = True
         else:

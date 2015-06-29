@@ -61,7 +61,6 @@ class Table(object):
         self.button = random.randint(1, len(self.seats) - 1)
         self.seats_active = len(Table._get_active_seats(self))
 
-
         # check to make sure we've assigned the button to an active seat
         button = True
         while button:
@@ -73,34 +72,24 @@ class Table(object):
                     self.button = 0
 
         # set the small blind
-        self.small_blind = self.button + 1
-        if self.small_blind >= len(self.seats):
-            self.small_blind = 0
-
-        # verify that the small blind is active
+        self.small_blind = self.button
         sb = True
         while sb:
+            self.small_blind += 1
+            if self.small_blind >= len(self.seats):
+                self.small_blind = 0
             if self.seats[self.small_blind].active:
                 sb = False
-            else:
-                self.small_blind += 1
-                if self.small_blind >= len(self.seats):
-                    self.small_blind = 0
 
         # set the big blind
-        self.big_blind = self.small_blind + 1
-        if self.big_blind >= len(self.seats):
-            self.big_blind = 0
-
-        # verify that the big blind is active
+        self.big_blind = self.small_blind
         bb = True
         while bb:
+            self.big_blind += 1
+            if self.big_blind >= len(self.seats):
+                self.big_blind = 0
             if self.seats[self.big_blind].active:
                 bb = False
-            else:
-                self.big_blind += 1
-                if self.big_blind >= len(self.seats):
-                    self.big_blind = 0
 
         # reset the blinds appropriately for head to head play
         active = Table._get_active_seats(self)
@@ -109,26 +98,23 @@ class Table(object):
             self.small_blind = self.button
 
         # set utg (Under the Gun) for first round of betting (first to act)
-        self.under_the_gun = self.big_blind + 1
-        # verify that the big blind is active
+        self.under_the_gun = self.big_blind
         utg = True
         while utg:
+            self.under_the_gun += 1
+            if self.under_the_gun >= len(self.seats):
+                self.under_the_gun = 0
             if self.seats[self.under_the_gun].active:
                 utg = False
-            else:
-                self.under_the_gun += 1
-                if self.under_the_gun >= len(self.seats):
-                    self.under_the_gun = 0
 
         Table.init_hand(self)
-
 
     def _button_move(self):
         """moves the buttons and the blinds"""
         # exits game when down to a single player
         if self.seats_active == 1:
             quit()
-        # correctly sets the blinds for head to head play
+        # correctly sets the small blind/button for head to head play
         elif self.seats_active == 2:
             self.button = self.big_blind
             self.small_blind = self.big_blind
@@ -140,13 +126,25 @@ class Table(object):
         move = True
         while move:
             self.big_blind += 1
-            # resets big_blind to 0 if its bigger than seats
+            # resets big_blind to 0 if it is greater than seats
             if self.big_blind >= len(self.seats):
                 self.big_blind = 0
+            # if seat is active ends the loop
             if self.seats[self.big_blind].active:
                 move = False
             else:
                 self.seats[self.big_blind].player.missed_blind = True
+
+        move = True
+        self.under_the_gun  = self.big_blind
+        while move:
+            self.under_the_gun += 1
+            # resets under_the_gun to 0 if it is greater than seats
+            if self.under_the_gun >= len(self.seats):
+                self.under_the_gun = 0
+            # if seat is active ends the loop
+            if self.seats[self.under_the_gun].active:
+                move = False
 
     def _create_pot(self):
         """creates the initial pot object with the blinds and antes"""
@@ -159,15 +157,14 @@ class Table(object):
         button_post = None
 
         # check for owed posts
-        ns_blind = self.big_blind - 1
+        """        ns_blind = self.big_blind - 1
         if ns_blind < 0:
             ns_blind = len(self.seats) - 1
         for seat in self.seats:
             if seat.active and seat.player.missed_blind:
                 if seat == self.seats(self.big_blind):
                     seat.player.missed_blind = False
-                elif seat == self.seats(self.small_blind):
-
+                elif seat == self.seats(self.small_blind):"""
 
         # if active add the small blind to the pot
         if sb.active:
@@ -230,8 +227,6 @@ class Table(object):
         for seat in self.seats:
             if seat.active and seat.player.stack == 0:
                 seat.active = False
-
-
 
     def init_hand(self):
         """sets the table and players up for a new hand, creates a new pot,
