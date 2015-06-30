@@ -36,7 +36,6 @@ class Pot(object):
         self.seats = seats
         self.all_in = all_in
         self.bet = bet
-        self.active = False
         self.first = first
 
 

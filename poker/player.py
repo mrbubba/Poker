@@ -12,10 +12,16 @@ class Player(object):
                       of betting
         action(bool):  if true allows player to act
         table(obj);  the table object
-        missed_blind(bool):  true if the player was inactive for the last
+        missed_big_blind(bool): true if the player was inactive for the last
                                 big blind
+        missed_small_blind(bool): true if the player was inactive for the last
+                                  small blind
+        dead_button(bool):  true if player is active, is the button, and has
+                           missed either blind.  (Player will be inactive for
+                           the hand.
 
      Methods:
+
         fold:   Removes player from all open pots(ends action for this hand),
                 and sets self.action to false
         check:  Only available if pot.current_bet is 0, passes tells table to
@@ -25,8 +31,8 @@ class Player(object):
         bet:    transfers money from self.stack to the current pot.  Must be
                 >= pot.current_bet + pot.bet_increment.  Unless the player is
                 all in for a lesser amount and sets self.action to false
-        active:  set seat.active to True
-        inactive:  set seat.active to False
+        play:  Toggle seat.active to True or False
+        change_seat:  Change to another available seat
 
     """
 
@@ -37,7 +43,9 @@ class Player(object):
         self.equity = int()
         self.action = False
         self.table = None
-        self.missed_blind = False
+        self.missed_big_blind = False
+        self.missed_small_blind = False
+        self.dead_button = False
 
     def fold(self):
         pass
@@ -49,4 +57,7 @@ class Player(object):
         pass
 
     def bet(self):
+        pass
+
+    def play(self):
         pass

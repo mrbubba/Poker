@@ -69,3 +69,5 @@ class TestDealer(unittest.TestCase):
         # inactive players shouldn't have cards
         self.assertEqual(len(self.table.seats[2].player.hole), 0)
 
+if __name__ == '__main__':
+    unittest.main()
