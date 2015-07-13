@@ -16,11 +16,10 @@ class Player(object):
                                 big blind
         missed_small_blind(bool): true if the player was inactive for the last
                                   small blind
-        dead_button(bool):  true if player is active, is the button, and has
-                           missed either blind.  (Player will be inactive for
-                           the hand.
+        frozen(bool):  true if player is active, owes blind/s and is ineligible
+                       to play this hand(Player will be inactive for the hand.)
 
-     Methods:
+Methods:
 
         fold:   Removes player from all open pots(ends action for this hand),
                 and sets self.action to false
@@ -45,7 +44,7 @@ class Player(object):
         self.table = None
         self.missed_big_blind = False
         self.missed_small_blind = False
-        self.dead_button = False
+        self.frozen = False
 
     def fold(self):
         pass

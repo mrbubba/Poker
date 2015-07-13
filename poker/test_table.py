@@ -4,6 +4,7 @@ from player import Player
 from table import Table
 from dealer import Dealer
 from seat   import Seat
+from pot import Pot
 
 
 class TestTable(unittest.TestCase):
@@ -14,28 +15,32 @@ class TestTable(unittest.TestCase):
         self.p1 = Player('p1', 100)
         self.p2 = Player('p2', 100)
         self.p3 = Player('p3', 100)
+        self.p4 = Player('p4', 100)
+        self.p5 = Player('p5', 100)
 
         self.s0 = Seat('s0')
         self.s1 = Seat('s1')
         self.s2 = Seat('s2')
         self.s3 = Seat('s3')
+        self.s4 = Seat('s4')
+        self.s5 = Seat('s5')
 
-        players = [self.p1, self.p1, self.p2, self.p3]
-        seats = [self.s0, self.s1, self.s2, self.s3]
+        players = [self.p0, self.p1, self.p2, self.p3, self.p4, self.p5]
+        seats = [self.s0, self.s1, self.s2, self.s3, self.s4, self.s5]
 
         self.table = Table(seats, 5, 10, 0)
         self.dealer = Dealer(self.table)
         self.table.dealer = self.dealer
 
-        i = 0
+        player = 0
         for seat in seats:
-            seat.player = players[i]
+            seat.player = players[player]
             seat.active = True
             seat.player.table = self.table
+            player += 1
 
     def test_set_button(self):
         """can we randomly set the button for initial play on active seats only??"""
-        self.setUp()
         self.table.seats[2].active = False
         self.table.set_button()
         a = self.table.button
@@ -62,6 +67,8 @@ class TestTable(unittest.TestCase):
 
         self.table.seats[3].active = False
         self.table.seats[2].active = False
+        self.table.seats[4].active = False
+        self.table.seats[5].active = False
         self.table.set_button()
         self.assertEqual(self.table.button, self.table.small_blind)
         self.assertEqual(self.table.button, self.table.under_the_gun)
@@ -69,7 +76,6 @@ class TestTable(unittest.TestCase):
 
     def test_button_move(self):
         """Can we move the button and the blinds appropriately?"""
-        self.setUp()
         self.table.small_blind = 0
         self.table.big_blind = 1
         self.table._button_move()
@@ -79,7 +85,6 @@ class TestTable(unittest.TestCase):
         self.assertEqual(self.table.under_the_gun, 3)
 
     def test_skip_inactive(self):
-        self.setUp()
         self.table.small_blind = 0
         self.table.big_blind = 1
         self.s2.active = False
@@ -88,8 +93,8 @@ class TestTable(unittest.TestCase):
 
     def test_dead_sb(self):
         """if the big blind goes inactive do we get a dead small blind?"""
-        self.setUp()
         self.s1.active = False
+        self.p1.missed_big_blind = False
         self.table.small_blind = 0
         self.table.big_blind = 1
         self.table._button_move()
@@ -97,9 +102,14 @@ class TestTable(unittest.TestCase):
 
     def test_button_move_head_to_head(self):
         """Can we move the blinds and button appropriately head to head?"""
-        self.setUp()
         self.s2.active = False
+        self.p2.missed_big_blind = True
         self.s3.active = False
+        self.p3.missed_big_blind = True
+        self.s4.active = False
+        self.p4.missed_big_blind = True
+        self.s5.active = False
+        self.p5.missed_big_blind = True
         self.table.small_blind = 3
         self.table.big_blind = 0
         self.table._button_move()
@@ -108,24 +118,61 @@ class TestTable(unittest.TestCase):
         self.assertEqual(self.table.big_blind, 1)
         self.assertEqual(self.table.under_the_gun, 0)
 
-    """ def test_set_missed_blinds(self):
-        """"""Do we set the players missed blinds appropriately?""""""
-        self.setUp()
+    def test_set_missed_bb(self):
+        """Do we set the players missed bb appropriately?"""
         self.table.small_blind = 0
         self.table.big_blind = 1
-        self.p3.active = False
+        self.s2.active = False
         self.table._button_move()
 
-        self.assertTrue(self.p3.missed_big_blind)
-        self.assertFalse(self.p3.missed_small_blind)
+        self.assertTrue(self.p2.missed_big_blind)
+        self.assertFalse(self.p2.missed_small_blind)
 
+    def test_set_missed_sb(self):
+        """Do we set the players missed sb appropriatly?"""
+        self.table.small_blind = 1
+        self.table.big_blind = 3
+        self.s2.active = False
+        self.p2.missed_big_blind = True
         self.table._button_move()
-        self.assertTrue(self.p3.missed_small_blind)"""
+        self.assertTrue(self.p2.missed_small_blind)
+
+    def test_buying_the_button(self):
+        """first active seat between buttons and sb should buy
+        the button, all others should be frozen"""
+        self.table.button = 0
+        self.p1.missed_big_blind = True
+        self.p2.missed_big_blind = True
+        self.table.small_blind = 3
+        self.table.big_blind = 4
+
+        self.table._reset_blinds()
+        self.assertTrue(self.table.bought_button == self.table.seats[1])
+        self.assertTrue(self.p2.frozen)
+
+    def test_button_buy_pays(self):
+        """The bb and sb don't pay after a button buy"""
+        self.table.button = 0
+        self.table.bought_button = self.s1
+        self.table.small_blind = 2
+        self.table.big_blind = 3
+        self.table._create_pot()
+
+        self.assertTrue(self.p2.stack == 100)
+        self.assertTrue(self.p3.stack == 100)
+        self.assertTrue(self.p1.stack == 85)
 
     def test_create_pot(self):
         """ can we spawn a pot object properly? """
+        self.table.small_blind = 0
+        self.table.big_blind = 1
+        self.table.utg = 2
+        self.p0.missed_big_blind = True
+        self.p4.missed_big_blind = True
+        self.p4.missed_small_blind = True
         pot = self.table._create_pot()
 
+        self.assertEqual(pot.pot, 40)
         self.assertEqual(len(self.table.pots), 1)
         self.assertEqual(pot.increment, self.table.big_blind_amount)
 
@@ -137,12 +184,34 @@ class TestTable(unittest.TestCase):
         self.assertTrue(self.table.seats[0].player.equity == 0)
         self.assertEqual(len(self.table.seats[0].player.hole), 0)
 
+    def test_reset_frozen_seat(self):
+        """ Can we reset dead button player to active"""
+        self.table.seats[4].active = False
+        self.table.seats[4].player.frozen = True
+        self.table._reset_players()
+
+        self.assertTrue(self.table.seats[4].active)
+        self.assertFalse(self.table.seats[4].player.frozen)
+
     def test_remove_0_stack(self):
         """Does the table remove broke players at the start of a hand??"""
         self.setUp()
         self.table.seats[2].player.stack = 0
         self.table._remove_0_stack()
         self.assertFalse(self.table.seats[2].active)
+
+    '''def test_init_hand(self):
+        """Does it all come together?"""
+        self.p0.stack = 0
+        self.table.set_button()
+        old_bb = self.table.big_blind
+        self.table.init_hand()
+        print(self.table.small_blind)
+        print(self.table.pots[0].pot)
+        self.assertFalse(old_bb == self.table.big_blind)
+        self.assertTrue(self.table.pots[0].pot == 15)
+        self.assertEqual(len(p1.hole), 2)'''
+
 
 if __name__ == '__main__':
     unittest.main()
