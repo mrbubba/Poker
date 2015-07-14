@@ -37,6 +37,8 @@ class Table(object):
     def __init__(self, seats, small_blind_amount, big_blind_amount, ante=0):
         self.community_cards = []
         self.seats = seats
+        # TODO: since the zero's are all indices of lists it might be better to initalize them as None.
+        # that way we know that the value has not been actually set.
         self.seats_active = 0
         self.small_blind_amount = small_blind_amount
         self.big_blind_amount = big_blind_amount
@@ -54,15 +56,26 @@ class Table(object):
             if seat.active:
                 active_seat.append(seat)
         return active_seat
+        # NOTE: you do not necessarily need to declare active_seat first.
+        # e.g.
+        # for seat in self.seats:
+        #   if seat.active:
+        #       try:
+        #           active_seat.append(seat)
+        #       except NameError:
+        #           active_seat = [seat]
+
+        # This is more "pythonic" the advantage is readability and style.
 
     def set_button(self):
-        """on start of game we need to randomly assign the button
-        and blinds to an active seat"""
+        """At the start of game we need to randomly assign the button
+        and blinds to an active seat."""
         self.button = random.randint(1, len(self.seats) - 1)
         self.seats_active = len(Table._get_active_seats(self))
 
         # check to make sure we've assigned the button to an active seat
-        move = True
+        move = True  # Note: you might want to declare this closer to the loop
+        # Wouldn't these be false anyway at the start of the game?
         for seat in self.seats:
             if seat.player:
                 seat.player.missed_big_blind = False
@@ -77,16 +90,17 @@ class Table(object):
                     self.button = 0
 
         # set the small blind
-        self.small_blind = self.button
+        self.small_blind = self.button + 1
         move = True
         while move:
-            self.small_blind += 1
             if self.small_blind >= len(self.seats):
                 self.small_blind = 0
             if self.seats[self.small_blind].active:
                 move = False
+            self.small_blind += 1
 
         # set the big blind
+        # NOTE: manicure
         self.big_blind = self.small_blind
         move = True
         while move:
@@ -97,10 +111,17 @@ class Table(object):
                 move = False
 
         # reset the blinds appropriately for head to head play
+        # WARNING! No. you are calling an instance method by referencing the class
+        # Better is self._get_active_seats()
         active = Table._get_active_seats(self)
+        # QUESTION: since this is a corner case that if it is true could cut off the need
+        # for quite a bit of other code should it come earlier?
         if len(active) == 2:
             self.big_blind = self.small_blind
             self.small_blind = self.button
+
+        # NOTE: Mani-pedi at line 106 you are doing the same logic.
+        # is there a way to abstract the logic into a method or function?
 
         # set utg (Under the Gun) for first round of betting (first to act)
         self.under_the_gun = self.big_blind
@@ -114,10 +135,19 @@ class Table(object):
 
     def _button_move(self):
         """moves the buttons and the blinds"""
+        # NOTE: can you be a little more descriptive in the doc string
+        # about how the button is supposed to move?
         # exits game when down to a single player
         if self.seats_active == 1:
             quit()
+            # WARNING: quit is simply a pass. maybe what you want to do here is
+            # raise a custom exception?
+
         # correctly sets the small blind/button for head to head play
+        # WARNING: Programming error seats_active is a list.
+        # you should test the length.
+
+        # QUESTION: is there a way to refactor this with the code starting at 119?
         elif self.seats_active == 2:
             self.button = self.big_blind
             self.small_blind = self.big_blind
@@ -136,9 +166,10 @@ class Table(object):
             # ensures that the small blind is moved to the appropriate seat
             move = True
             while move:
-                self.small_blind += 1
+                self.small_blind += 1 # NOTE: SFT
                 # resets small_blind to 0 if it is greater than seats
-                if self.small_blind >= len(self.seats):
+                if self.small_blind >= len(self.seats): # REVISIT: we talked about this ... fare catch. Might be a
+                                                        # a security issue here.
                     self.small_blind = 0
                 # if seat is active ends the loop
                 if self.seats[self.small_blind].active:
@@ -152,7 +183,7 @@ class Table(object):
             # ensures that the big blind is moved to the next active seat
             move = True
             while move:
-                self.big_blind += 1
+                self.big_blind += 1 # NOTE: SFT
                 # resets big_blind to 0 if it is greater than seats
                 if self.big_blind >= len(self.seats):
                     self.big_blind = 0
