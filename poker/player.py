@@ -18,8 +18,12 @@ class Player(object):
                                   small blind
         frozen(bool):  true if player is active, owes blind/s and is ineligible
                        to play this hand(Player will be inactive for the hand.)
+        hot_seat(bool): indicates that action is on the player
 
-Methods:
+        hand(str): the final poker hand as set by Analyzer
+
+
+    Methods:
 
         fold:   Removes player from all open pots(ends action for this hand),
                 and sets self.action to false
@@ -32,6 +36,7 @@ Methods:
                 all in for a lesser amount and sets self.action to false
         play:  Toggle seat.active to True or False
         change_seat:  Change to another available seat
+        act(bool):  sets hot_seat, and allows player to act.
 
     """
 
@@ -45,9 +50,23 @@ Methods:
         self.missed_big_blind = False
         self.missed_small_blind = False
         self.frozen = False
+        self.seat = None
+        self.hand = []
 
-    def fold(self):
-        pass
+    # Allows player to sit in or out of a hand.  If player is in a hand they fold
+    # They will rejoin on the next hand
+    def play(self):
+        if self.seat.active:
+            self.seat.active = False
+        else:
+            self.frozen = True
+
+    def act(self):
+        self.hot_seat = True
+        while self.hot_seat:
+            if self.table.bet == self.equity:
+                pass
+
 
     def check(self):
         pass
@@ -58,5 +77,8 @@ Methods:
     def bet(self):
         pass
 
-    def play(self):
+    def fold(self):
+        pass
+
+    def change_seat(self):
         pass

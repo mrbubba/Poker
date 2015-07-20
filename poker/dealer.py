@@ -37,30 +37,28 @@ class Dealer(object):
         for seat in self.table.seats:
             if seat.active:
                 active_players.append(seat.player)
-        return  active_players
+        return active_players
 
     def deal_hole(self):
         """Deals the two hole cards to all active players"""
-        active_players = Dealer._get_active_players(self)
+        pot = self.table.pots[len(self.table.pots)-1]
+        active_players = self._get_active_players()
         self.deck.create()
         for i in range(2):
             for player in active_players:
                 x = self.deck.deal()
                 player.hole.append(x)
+        pot.betting_round()
 
     def deal(self):
-        pot = self.table.pots(len(self.table.pots)-1)
-        first = self.table.seats[self.button + 1]
-        if first == len(self.table.seats):
-            first = 0
-        pot.first = first
+        pot = self.table.pots[len(self.table.pots)-1]
         if len(self.table.community_cards) == 0:
             for i in range(3):
                 self.table.community_cards.append(self.deck.deal())
-                pot.active = True
-        elif len(self.table.community_cards) > 2 and len(self.table.community_cards) < 5:
+            pot.betting_round()
+        elif len(self.table.community_cards) < 5:
             self.table.community_cards.append(self.deck.deal())
-            pot.active = True
+            pot.betting_round()
         else:
             return Analyzer(self.table)
 

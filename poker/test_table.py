@@ -35,6 +35,7 @@ class TestTable(unittest.TestCase):
         player = 0
         for seat in seats:
             seat.player = players[player]
+            seat.player.seat = seat
             seat.active = True
             seat.player.table = self.table
             player += 1

@@ -47,12 +47,13 @@ class TestDealer(unittest.TestCase):
         self.dealer = Dealer(self.table)
         self.table.dealer = self.dealer
 
-        i = 0
+        player = 0
         for seat in seats:
-            seat.player = players[i]
+            seat.player = players[player]
+            seat.player.seat = seat
             seat.active = True
             seat.player.table = self.table
-            i += 1
+            player += 1
 
     def test_deal_hole(self):
         """can the dealer deal two cards to each player??"""

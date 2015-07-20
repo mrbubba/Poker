@@ -130,8 +130,10 @@ class Table(object):
             self.under_the_gun = self.button
 
     def _reset_blinds(self):
-        """ handles corner cases where a missed blind changes the blinds"""
-        # if someone between small blind and the button goes active they bought the blind
+        """ handles corner cases where a missed blind changes the position of
+        the blinds"""
+        # if someone between small blind and the button goes active they bought
+        # the blind
 
         count = self.button + 1
         self.bought_button = None
@@ -208,6 +210,7 @@ class Table(object):
         elif self.bought_button:
             self.button = self.bought_button
             self.bought_button = None
+            self.first = self.small_blind
 
             #only move the big blind if they busted out last hand
             if not self.seats[self.big_blind].active:
@@ -258,6 +261,8 @@ class Table(object):
                 else:
                     self.seats[self.small_blind].player.missed_small_blind = True
                     self.small_blind += 1
+            # first is first to act post flop
+            self.first = self.small_blind
 
             # ensures that the big blind is moved to the next active seat
             move = True
@@ -364,7 +369,7 @@ class Table(object):
                     sb.active = False
                     all_in.append(sb)
 
-            # add the big blind too the pot
+            # add the big blind to the pot
             if bb.player.stack > self.big_blind_amount:
                 bb.player.stack -= self.big_blind_amount
                 pot += self.big_blind_amount
@@ -435,16 +440,17 @@ class Table(object):
                     if seat.player.equity > 0:
                         all_in.append(seat)
 
-        # (pot, init_increment, increment, seats, all_in, bet, utg, first)
+        # (pot, init_increment, increment, seats, all_in, bet, utg, first, table)
         pot = Pot(pot, self.big_blind_amount, self.big_blind_amount,
                   self.seats, all_in, self.big_blind_amount,
-                  self.under_the_gun, self.first)
-        self.pots = [pot]
+                  self.under_the_gun, self.first, self)
+        self.pots.append(pot)
         return pot
 
     def _reset_players(self):
         # set player attributes for start of new hand
         self.community_cards = []
+        self.pots = []
         for seat in self.seats:
             if seat.player.frozen:
                 seat.active = True
