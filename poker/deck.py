@@ -16,6 +16,9 @@ class Card(object):
         self.value = value
         self.suit = suit
 
+    def __str__(self):
+        return "Card {0} {1} {2}".format(self.name, self.suit, self.value)
+
 
 class Deck(object):
     """ a collection compromising a full deck of playing card objects
