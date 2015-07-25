@@ -79,7 +79,6 @@ class Analyzer(object):
                     else:
                         player.hand = [1, pairs[0], values[0], values[1], values[2]]
                 else:
-                    print(values)
                     player.hand = [0, values[0], values[1], values[2], values[3], values[4]]
 
     def _straight(self, player):

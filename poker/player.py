@@ -67,7 +67,6 @@ class Player(object):
             if self.table.bet == self.equity:
                 pass
 
-
     def check(self):
         pass
 

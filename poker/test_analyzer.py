@@ -46,6 +46,25 @@ class TestAnalyzer(unittest.TestCase):
         self.dealer.deal()
         self.analyzer = Analyzer(self.table)
 
+    def test_hi_card(self):
+        """can we identify a hi card hand?"""
+        players = self.analyzer._setup()
+
+        self.p4.hole[0].value = 12
+        self.p4.hole[1].value = 11
+        self.p4.hole[2].value = 9
+        self.p4.hole[3].value = 14
+        self.p4.hole[4].value = 13
+        self.p4.hole[5].value = 3
+        self.p4.hole[6].value = 2
+
+        players = self.analyzer._order(players)
+
+        self.analyzer._matching(players)
+
+        expected = [0, 14, 13, 12, 11, 9]
+        self.assertEqual(self.p4.hand, expected)
+
     def test_matching_hands(self):
         """can we find matching number hands
          eg.  pairs through quads??"""
