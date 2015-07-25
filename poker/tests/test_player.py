@@ -1,6 +1,6 @@
 __author__ = 'mark'
 import unittest
-from player import Player
+from poker.player import Player
 
 
 

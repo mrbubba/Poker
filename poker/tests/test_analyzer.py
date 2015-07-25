@@ -1,11 +1,11 @@
 __author__ = 'mark'
 import unittest
-from player import Player
-from table import Table
-from dealer import Dealer
-from seat import Seat
-from analyzer import Analyzer
-from pot import Pot
+from poker.player import Player
+from poker.table import Table
+from poker.dealer import Dealer
+from poker.seat import Seat
+from poker.analyzer import Analyzer
+from poker.pot import Pot
 
 
 class TestAnalyzer(unittest.TestCase):

@@ -1,10 +1,10 @@
 __author__ = 'mark'
 import unittest
-from deck import Card, Deck
-from player import Player
-from table import Table
-from dealer import Dealer
-from seat   import Seat
+from poker.deck import Card, Deck
+from poker.player import Player
+from poker.table import Table
+from poker.dealer import Dealer
+from poker.seat import Seat
 
 class TestDeck(unittest.TestCase):
     """Do We have a working deck??"""
