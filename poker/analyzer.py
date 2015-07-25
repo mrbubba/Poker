@@ -4,6 +4,7 @@ from table import Table
 from pot import Pot
 from player import Player
 
+
 class Analyzer(object):
     """ Analyzer object
 
@@ -36,8 +37,34 @@ class Analyzer(object):
         # self.pot = self.table.pots.pop()
         self.pot = self.table.pots[0]
 
-    def _compare(self):
+    def _compare(self, players):
         """compares all player hands and awards pot to the winner/s"""
+        value = []
+        # get the first value in players hands
+        for player in players:
+            value.append(player.hand[0])
+        # order the values and return the highest value
+        value.sort()
+        value = value.pop()
+        # get rid of all players with a lower value
+        players = [x for x in players if x.hand[0] == value]
+        # if we're down to one player we have a winner
+        if len(players) == 1:
+            return players
+        else:
+            # since we're down to hands of equal length get the length of
+            # the hand so we can iterate through them in search of a winner
+            for i in range(1, len(players[0].hand)):
+                value = []
+                for player in players:
+                    value.append(player.hand[i])
+                value.sort()
+                value = value.pop()
+                players = [x for x in players if x.hand[i] == value]
+                # if we're down to one player we have a winner
+                if len(players) == 1:
+                    return players
+            return players
 
     def _matching(self, players):
         """identifies the highest value matching hands eg quads to pairs"""
@@ -65,7 +92,7 @@ class Analyzer(object):
                     elif count == 2:
                         pairs.append(v)
                         values = [x for x in values if x != v]
-                #Now we create hands based on the quads, trips,
+                # Now we create hands based on the quads, trips,
                 # and pairs lists.
                 if quads:
                     player.hand = [7, quads[0], values[0]]
@@ -86,9 +113,9 @@ class Analyzer(object):
 
     def _straight(self, player):
         """identifies the highest straight in a hand"""
-            # create a local variable 'values' to more easily handle the
-            # hand.  Easier to deal with a list of values rather than a list
-            # of objects
+        # create a local variable 'values' to more easily handle the
+        # hand.  Easier to deal with a list of values rather than a list
+        # of objects
         values = []
         for card in player.hole:
             values.append(card.value)
@@ -106,7 +133,7 @@ class Analyzer(object):
     def _flush(self, players):
         """Identify those hands that are flushes"""
         for player in players:
-            suits ={'d': [], 'h': [], 's': [], 'c': []}
+            suits = {'d': [], 'h': [], 's': [], 'c': []}
             for card in player.hole:
                 x = card.suit
                 suits[x].append(card)
@@ -137,7 +164,6 @@ class Analyzer(object):
     def _setup(self):
         """get the players in the pot and their hands"""
         players = []
-
         """get all active players and append them to players  """
 
         for seat in self.pot.seats:
@@ -152,4 +178,3 @@ class Analyzer(object):
             player.hole += self.table.community_cards
 
         return players
-

@@ -5,7 +5,6 @@ from table import Table
 from dealer import Dealer
 from seat import Seat
 from analyzer import Analyzer
-from pot import Pot
 
 
 class TestAnalyzer(unittest.TestCase):
@@ -45,6 +44,37 @@ class TestAnalyzer(unittest.TestCase):
         self.dealer.deal()
         self.dealer.deal()
         self.analyzer = Analyzer(self.table)
+
+    def test_compare(self):
+        """can we determine the winning hand"""
+        players = self.analyzer._setup()
+
+        self.p0.hand = [0, 14, 12, 11, 10, 8]
+        self.p1.hand = [1, 14, 12, 11, 8]
+        self.p2.hand = [7, 8, 14]
+        self.p3.hand = [7, 10, 2]
+        self.p4.hand = [0]
+        self.p5.hand = [0]
+
+        result = self.analyzer._compare(players)
+        expected = [self.p3]
+        self.assertEqual(expected, result)
+
+    def test_compare_multiple(self):
+        """if there are multiple winners do we
+        return all of them?"""
+        players = self.analyzer._setup()
+
+        self.p0.hand = [0, 14, 12, 11, 10, 8]
+        self.p1.hand = [1, 14, 12, 11, 8]
+        self.p2.hand = [7, 10, 2]
+        self.p3.hand = [7, 10, 2]
+        self.p4.hand = [0]
+        self.p5.hand = [0]
+
+        result = self.analyzer._compare(players)
+        expected = [self.p2, self.p3]
+        self.assertEqual(expected, result)
 
     def test_hi_card(self):
         """can we identify a hi card hand?"""
