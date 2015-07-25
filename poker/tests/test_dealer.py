@@ -58,7 +58,7 @@ class TestDealer(unittest.TestCase):
     def test_deal_hole(self):
         """can the dealer deal two cards to each player??"""
         self.table.seats[2].active = False
-        self.dealer.deal_hole()
+        self.table.init_hand()
         # only want the active players
         players = []
         for seat in self.table.seats:

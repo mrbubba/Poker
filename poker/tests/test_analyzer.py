@@ -126,7 +126,7 @@ class TestAnalyzer(unittest.TestCase):
         self.p1.hole[0].value = 14
         self.p1.hole[1].value = 11
 
-        players = self.analyzer._order(players)
+        self.analyzer._order(players)
 
         self.analyzer._straight(self.p0)
         self.analyzer._straight(self.p1)

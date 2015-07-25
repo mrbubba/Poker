@@ -36,6 +36,9 @@ class Analyzer(object):
         # self.pot = self.table.pots.pop()
         self.pot = self.table.pots[0]
 
+    def _compare(self):
+        """compares all player hands and awards pot to the winner/s"""
+
     def _matching(self, players):
         """identifies the highest value matching hands eg quads to pairs"""
         for player in players:
