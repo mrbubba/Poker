@@ -45,6 +45,39 @@ class TestAnalyzer(unittest.TestCase):
         self.dealer.deal()
         self.analyzer = Analyzer(self.table)
 
+    def test_award(self):
+        """can we award a single winner the entire pot?"""
+        players = [self.p2]
+        self.table.pots[0].pot = 100
+        self.p2.stack = 90
+        self.analyzer._award(players)
+
+        self.assertEqual(self.p2.stack, 190)
+
+    def test_award_multiple(self):
+        """Can we pay out evenly to multiple winners?"""
+        players = [self.p2, self.p3]
+        self.table.pots[0].pot = 100
+        self.p2.stack = 50
+        self.p3.stack = 50
+        self.analyzer._award(players)
+
+        self.assertEqual(self.p2.stack, 100)
+        self.assertEqual(self.p3.stack, 100)
+
+    def test_award_indivisible(self):
+        """Can we properly pay pots that don't divide
+        evenly?"""
+        players = [self.p2, self.p3]
+        self.table.first = 1
+        self.table.pots[0].pot = 105
+        self.p2.stack = 50
+        self.p3.stack = 50
+        self.analyzer._award(players)
+
+        self.assertEqual(self.p2.stack, 105)
+        self.assertEqual(self.p3.stack, 100)
+
     def test_compare(self):
         """can we determine the winning hand"""
         players = self.analyzer._setup()

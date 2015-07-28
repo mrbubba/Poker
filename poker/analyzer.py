@@ -35,7 +35,32 @@ class Analyzer(object):
     def __init__(self, table):
         self.table = table
         # self.pot = self.table.pots.pop()
-        self.pot = self.table.pots[0]
+        self.pot = self.table.pots[len(self.table.pots)-1]
+
+    def _award(self,players):
+        """awards the pot to the winer/s"""
+        if len(players) == 1:
+            players[0].stack += self.pot.pot
+        elif (self.pot.pot/self.table.small_blind_amount) % len(players) == 0:
+            for player in players:
+                player.stack += self.pot.pot / len(players)
+        else:
+            # if the pot isn't evenly divisible(in small blind units) subtract
+            # out the remainder, and split the remaining pot up equally
+            remainder = (self.pot.pot/self.table.small_blind_amount) % len(players)
+            self.pot.pot = self.pot.pot - (self.table.small_blind_amount * remainder)
+            # hand out the remainder one small blind unit at a time starting
+            # with first to act
+            for player in players:
+                player.stack += self.pot.pot / len(players)
+            i = self.table.first
+            while remainder > 0:
+                if self.table.seats[i].player in players:
+                    self.table.seats[i].player.stack += self.table.small_blind_amount
+                    remainder -= 1
+                i += 1
+                if i == len(self.table.seats):
+                    i = 0
 
     def _compare(self, players):
         """compares all player hands and awards pot to the winner/s"""
@@ -132,27 +157,29 @@ class Analyzer(object):
 
     def _flush(self, players):
         """Identify those hands that are flushes"""
+
         for player in players:
-            suits = {'d': [], 'h': [], 's': [], 'c': []}
-            for card in player.hole:
-                x = card.suit
-                suits[x].append(card)
-            for suit in suits:
-                if len(suits[suit]) >= 5:
-                    player.hole = list(suits[suit])
+            if not player.hand:
+                suits = {'d': [], 'h': [], 's': [], 'c': []}
+                for card in player.hole:
+                    x = card.suit
+                    suits[x].append(card)
+                for suit in suits:
+                    if len(suits[suit]) >= 5:
+                        player.hole = list(suits[suit])
+                        self._straight(player)
+                        if player.hand:
+                            value = player.hand[1]
+                            player.hand = [8, value]
+                        else:
+                            player.hand = [5] + player.hole
+                # if we have a flush only accept the top five cards to make a
+                # poker hand
+                if player.hand:
+                    while len(player.hand) > 6:
+                        player.hand.pop()
+                else:
                     self._straight(player)
-                    if player.hand:
-                        value = player.hand[1]
-                        player.hand = [8, value]
-                    else:
-                        player.hand = [5] + player.hole
-            # if we have a flush only accept the top five cards to make a
-            # poker hand
-            if player.hand:
-                while len(player.hand) > 6:
-                    player.hand.pop()
-            else:
-                self._straight(player)
         return players
 
     def _order(self, players):

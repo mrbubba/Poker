@@ -457,6 +457,7 @@ class Table(object):
                 seat.player.frozen = False
             if seat.player is not None:
                 seat.player.hole = []
+                seat.player.hand = []
                 seat.player.equity = 0
 
     def _remove_0_stack(self):
