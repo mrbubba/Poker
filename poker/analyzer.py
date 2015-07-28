@@ -37,7 +37,7 @@ class Analyzer(object):
         # self.pot = self.table.pots.pop()
         self.pot = self.table.pots[len(self.table.pots)-1]
 
-    def _award(self,players):
+    def _award(self, players):
         """awards the pot to the winer/s"""
         if len(players) == 1:
             players[0].stack += self.pot.pot
@@ -205,3 +205,11 @@ class Analyzer(object):
             player.hole += self.table.community_cards
 
         return players
+
+    def analyze(self):
+        players = self._setup()
+        self._order(players)
+        self._flush(players)
+        self._matching(players)
+        self._compare(players)
+        self._award(players)
