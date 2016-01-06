@@ -10,7 +10,6 @@ class Player(object):
         hole(list):  a list that holds the two private cards for the player
         equity(int):  how much the current player has put in the current round
                       of betting
-        action(bool):  if true allows player to act
         table(obj);  the table object
         missed_big_blind(bool): true if the player was inactive for the last
                                 big blind
@@ -61,19 +60,16 @@ class Player(object):
         else:
             self.frozen = True
 
-    def act(self):
-        self.hot_seat = True
-        while self.hot_seat:
-            if self.table.bet == self.equity:
-                pass
+    def bet(self, amount):
+        if self.action:
+            self.stack -= amount
+            self.equity += amount
+            self.table.pots[-1].pot += amount
 
     def check(self):
         pass
 
     def call(self):
-        pass
-
-    def bet(self):
         pass
 
     def fold(self):

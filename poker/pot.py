@@ -1,5 +1,6 @@
 __author__ = 'mark'
 
+
 class Pot(object):
     """The pot object will drive and track the betting action for each round of
         play.
@@ -49,18 +50,30 @@ class Pot(object):
         award the pot to the remaining player and notify the table to start a
         new hand.
         """
+        # are we in the middle of an active round of betting?
+        # If so increment to the next active player
+        action_player = False
+        for seat in self.seats:
+            if seat.player.action:
+                print(seat.player.name, seat.player.action)
+                seat.player.action = False
+                try:
+                    i += 1
+                    print("try", i)
+                except NameError:
+                    i = 0
+                if i >= len(self.seats):
+                    i = 0
+                self.seats[i].player.action = True
+                print(seat.player.name)
+                action_player = True
+                print("here", action_player, i)
 
-        # if no community cards have been dealt
-        # first to act(fta) is under the gun
-        if not self.table.community_cards:
-            fta = self.table.under_the_gun
-        else:
-            fta = self.first
-        # set fta players action to True
-        self.table.seats[fta].player.action = True
-        # create an increment (next to act nta) to move the action
-        # around the table
-        nta = fta +1
-        if nta == len(self.seats):
-            nta = 0
-
+        # if no community cards have been dealt utg is first to act
+        if not action_player:
+            print("fuck me")
+            if not self.table.community_cards:
+                self.seats[self.utg].player.action = True
+                # if community cards then first is first to act.
+            else:
+                self.seats[self.first].player.action = True

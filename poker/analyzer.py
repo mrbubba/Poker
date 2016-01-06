@@ -38,7 +38,7 @@ class Analyzer(object):
         self.pot = self.table.pots[len(self.table.pots)-1]
 
     def _award(self, players):
-        """awards the pot to the winer/s"""
+        """awards the pot to the winner(s)"""
         if len(players) == 1:
             players[0].stack += self.pot.pot
         elif (self.pot.pot/self.table.small_blind_amount) % len(players) == 0:
