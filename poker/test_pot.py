@@ -68,14 +68,6 @@ class TestPot(unittest.TestCase):
                 print(seat.player.name, seat.player.equity, seat.player.action)
         print(self.table.pots[-1].pot)
 
-    def disabled_test_betting_turn(self):
-       loop = 0
-       limit = 6
-       while loop < limit:
-            loop += 1
-            pots_count = len(self.table.pots)
-            print("Test loop {0} pot count {1}----------------------".format(loop,pots_count))
-            self.table.pots[0].betting_turn()
 
 if __name__ == '__main__':
     unittest.main()

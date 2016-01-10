@@ -71,18 +71,3 @@ class Pot(object):
         else:
             self.seats[self.first].player.action = True
 
-    def betting_turn(self):
-        action_moved = False
-        for seat in self.seats:
-            n = seat.player.name
-            a = seat.player.action
-            index = self.seats.index(seat)
-            if a and not action_moved:
-                seat.player.action = False
-                index += 1
-                if index == len(self.seats):
-                    index = 0
-                action_moved = True
-                self.seats[index].player.action = True
-
-            print("name={1} state={2} index={3}".format(len(self.seats), n, a, index))
