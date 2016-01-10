@@ -1,10 +1,10 @@
 __author__ = 'mark'
 import unittest
-from .pot import Pot
-from .table import Table
-from .player import Player
-from .seat import Seat
-from .dealer import Dealer
+from pot import Pot
+from table import Table
+from player import Player
+from seat import Seat
+from dealer import Dealer
 
 
 class TestPot(unittest.TestCase):
@@ -63,10 +63,19 @@ class TestPot(unittest.TestCase):
                 print(seat.player.name, seat.player.equity, seat.player.action)
                 if seat.player.action:
                     seat.player.bet(50)
-                    print(seat.player.name, seat.player.equity, seat.player.action)
                     self.table.pots[-1].betting_round()
+                    break
+                print(seat.player.name, seat.player.equity, seat.player.action)
         print(self.table.pots[-1].pot)
 
+    def disabled_test_betting_turn(self):
+       loop = 0
+       limit = 6
+       while loop < limit:
+            loop += 1
+            pots_count = len(self.table.pots)
+            print("Test loop {0} pot count {1}----------------------".format(loop,pots_count))
+            self.table.pots[0].betting_turn()
 
 if __name__ == '__main__':
     unittest.main()

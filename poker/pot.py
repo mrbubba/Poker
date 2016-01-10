@@ -52,28 +52,37 @@ class Pot(object):
         """
         # are we in the middle of an active round of betting?
         # If so increment to the next active player
-        action_player = False
         for seat in self.seats:
             if seat.player.action:
-                print(seat.player.name, seat.player.action)
                 seat.player.action = False
-                try:
-                    i += 1
-                    print("try", i)
-                except NameError:
+                i = self.seats.index(seat)
+                print("here we be", i, "seat ", seat.player.name)
+                i += 1
+                if i == len(self.seats):
                     i = 0
-                if i >= len(self.seats):
-                    i = 0
+                    print(i)
                 self.seats[i].player.action = True
-                print(seat.player.name)
-                action_player = True
-                print("here", action_player, i)
+                return
 
         # if no community cards have been dealt utg is first to act
-        if not action_player:
-            print("fuck me")
-            if not self.table.community_cards:
-                self.seats[self.utg].player.action = True
-                # if community cards then first is first to act.
-            else:
-                self.seats[self.first].player.action = True
+        if not self.table.community_cards:
+            self.seats[self.utg].player.action = True
+        # if community cards then first is first to act.
+        else:
+            self.seats[self.first].player.action = True
+
+    def betting_turn(self):
+        action_moved = False
+        for seat in self.seats:
+            n = seat.player.name
+            a = seat.player.action
+            index = self.seats.index(seat)
+            if a and not action_moved:
+                seat.player.action = False
+                index += 1
+                if index == len(self.seats):
+                    index = 0
+                action_moved = True
+                self.seats[index].player.action = True
+
+            print("name={1} state={2} index={3}".format(len(self.seats), n, a, index))
